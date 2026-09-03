@@ -37,13 +37,7 @@ export default function LinksPage() {
         </a>
 
         <div className="links-avatar">
-          {/* TODO: reemplazar por foto real de Melisa en /public/melisa.jpg */}
-          <svg viewBox="0 0 64 64" fill="none" className="links-clover">
-            <path
-              d="M32 30c-6-10-20-10-20 2 0 8 9 10 20-2Zm0 0c6-10 20-10 20 2 0 8-9 10-20-2Zm0 0c-10-6-10-20 2-20 8 0 10 9-2 20Zm0 0c10-6 10-20-2-20-8 0-10 9 2 20Z"
-              fill="currentColor"
-            />
-          </svg>
+          <img src="/melisa.jpg" alt="Melisa Zanabria" className="links-avatar-img" />
         </div>
 
         <h1>Melisa Zanabria</h1>

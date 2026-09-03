@@ -69,18 +69,12 @@ export default function Home() {
             </div>
 
             <div className="hero-photo">
-              {/* TODO: reemplazar por una foto profesional real de Melisa (retrato, buena luz, fondo simple).
-                  Formato sugerido: JPG/WEBP vertical, mínimo 900x1100px, en /public/melisa.jpg */}
               <div className="hero-photo-frame">
-                <div className="hero-photo-placeholder">
-                  <svg viewBox="0 0 64 64" fill="none" className="hero-clover">
-                    <path
-                      d="M32 30c-6-10-20-10-20 2 0 8 9 10 20-2Zm0 0c6-10 20-10 20 2 0 8-9 10-20-2Zm0 0c-10-6-10-20 2-20 8 0 10 9-2 20Zm0 0c10-6 10-20-2-20-8 0-10 9 2 20Z"
-                      fill="currentColor"
-                    />
-                  </svg>
-                  <span>Foto de Melisa próximamente</span>
-                </div>
+                <img
+                  src="/melisa.jpg"
+                  alt="Melisa Zanabria, agente inmobiliaria"
+                  className="hero-photo-img"
+                />
               </div>
             </div>
           </div>
