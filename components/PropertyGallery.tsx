@@ -68,6 +68,7 @@ export default function PropertyGallery({ properties }: { properties: Property[]
               <p className="prop-facts">
                 {[p.surface, p.rooms, p.baths].filter(Boolean).join(" · ")}
               </p>
+              {p.price && <p className="prop-price">{p.price}</p>}
             </div>
           </button>
         ))}
@@ -128,6 +129,7 @@ export default function PropertyGallery({ properties }: { properties: Property[]
                   .filter(Boolean)
                   .join(" · ")}
               </p>
+              {active.price && <p className="modal-price">{active.price}</p>}
               <p className="modal-description">{active.description}</p>
 
               {active.features.length > 0 && (
