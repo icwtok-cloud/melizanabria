@@ -56,8 +56,12 @@ export default function PropertyGallery({ properties }: { properties: Property[]
             aria-label={`Ver detalle de ${p.title}`}
           >
             <div className="prop-card-img">
-              <img src={p.images[0]} alt={p.title} loading="lazy" />
-              <span className="prop-tag">{p.operation}</span>
+              {p.video ? (
+                <video src={p.video} muted loop autoPlay playsInline />
+              ) : (
+                <img src={p.images[0]} alt={p.title} loading="lazy" />
+              )}
+              <span className="prop-tag">{p.video ? "Pozo" : p.operation}</span>
             </div>
             <div className="prop-card-body">
               <span className="prop-type">{p.type}</span>
@@ -88,8 +92,12 @@ export default function PropertyGallery({ properties }: { properties: Property[]
             </button>
 
             <div className="modal-gallery">
-              <img src={active.images[photoIndex]} alt={active.title} />
-              {active.images.length > 1 && (
+              {active.video ? (
+                <video src={active.video} controls autoPlay playsInline />
+              ) : (
+                <img src={active.images[photoIndex]} alt={active.title} />
+              )}
+              {!active.video && active.images.length > 1 && (
                 <>
                   <button
                     className="modal-nav modal-nav-prev"

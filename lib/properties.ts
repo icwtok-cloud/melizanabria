@@ -5,6 +5,8 @@ export type Property = {
   location: string;
   operation: "Venta";
   price?: string;
+  /** Valor numérico en USD usado solo para ordenar de mayor a menor. Si no se define, se ordena al final. */
+  sortPrice?: number;
   surface?: string;
   covered?: string;
   rooms?: string;
@@ -13,6 +15,8 @@ export type Property = {
   description: string;
   features: string[];
   images: string[];
+  /** Si está definido, la card muestra este video en vez de imagen y el modal lo reproduce. */
+  video?: string;
   sourceUrl: string;
 };
 
@@ -24,6 +28,7 @@ export const properties: Property[] = [
     location: "Adelina Centro, Santo Tomé",
     operation: "Venta",
     price: "USD 11.500",
+    sortPrice: 11500,
     surface: "200 m² (10 x 20)",
     extra: "Listo para escriturar",
     description:
@@ -41,6 +46,7 @@ export const properties: Property[] = [
     location: "República del Oeste, Santa Fe",
     operation: "Venta",
     price: "USD 73.000",
+    sortPrice: 73000,
     surface: "147 m² de terreno",
     rooms: "3 dormitorios",
     baths: "2 baños",
@@ -60,6 +66,7 @@ export const properties: Property[] = [
     location: "Barranquitas, Santa Fe",
     operation: "Venta",
     price: "USD 63.000",
+    sortPrice: 63000,
     covered: "43,99 m² cubiertos",
     rooms: "1 dormitorio",
     baths: "1 baño",
@@ -79,6 +86,7 @@ export const properties: Property[] = [
     location: "Alejandra, Santa Fe",
     operation: "Venta",
     surface: "1.300 m² de terreno (20 x 65)",
+    // Sin precio publicado: se ordena al final del listado
     covered: "112 m² cubiertos",
     rooms: "2 dormitorios",
     baths: "1 baño",
@@ -98,6 +106,7 @@ export const properties: Property[] = [
     location: "Colastiné, Santa Fe",
     operation: "Venta",
     price: "USD 19.000 · acepta financiación",
+    sortPrice: 19000,
     surface: "220 m² (13 x 17)",
     extra: "A 7 minutos de Santa Fe",
     description:
@@ -115,6 +124,7 @@ export const properties: Property[] = [
     location: "Setúbal, Monte Vera",
     operation: "Venta",
     price: "USD 115.000",
+    sortPrice: 115000,
     surface: "512 m² de terreno",
     covered: "205 m² cubiertos",
     rooms: "3 dormitorios",
@@ -135,6 +145,7 @@ export const properties: Property[] = [
     location: "Fomento 9 de Julio, Santa Fe",
     operation: "Venta",
     price: "USD 12.000",
+    sortPrice: 12000,
     extra: "Con renta activa: $110.000/mes",
     description:
       "Cochera semicubierta en venta sobre calle Córdoba, a media cuadra de Aristóbulo del Valle. Cuenta con portón de acceso automatizado y cámaras, lo que brinda mayor seguridad y comodidad para el ingreso y egreso del vehículo. Ideal tanto para uso propio como para inversión en una zona con alta demanda de estacionamiento. Genera ingresos desde el primer día: baja inversión, alta demanda.",
@@ -160,7 +171,84 @@ export const properties: Property[] = [
     ],
     sourceUrl: "https://www.mercado-unico.com/propiedades/6896c4643b3f8e00119aa29a",
   },
+  {
+    slug: "1-de-mayo-3181-frente",
+    title: "1 de Mayo 3181 · Frente",
+    type: "Departamento a estrenar",
+    location: "Constituyentes, Santa Fe",
+    operation: "Venta",
+    extra: "Entrega abril 2028 · financiación propia hasta 36 cuotas",
+    covered: "49 m² cubiertos",
+    rooms: "1 dormitorio",
+    baths: "1 baño",
+    description:
+      "Sauce 46, edificio en semi torre ubicado en 1° de Mayo 3181, en el corazón de Constituyentes, a metros de la plaza. Depto de 1 dormitorio con 50,48 m² de superficie propia: estar comedor integrado, cocina, dormitorio con placard, baño completo y balcón propio. El edificio cuenta con terraza en altura (piso 18) con piscina y solarium, asador doble equipado, espacios con pergolado semicubierto y cocheras cubiertas y descubiertas en PB. Hay más unidades disponibles en distintos pisos y orientaciones.",
+    features: ["Pileta en altura", "Balcón", "Financiación propia sin banco", "Agua corriente", "Cloacas"],
+    images: [
+      "https://images.mercado-unico.com/mu/c_thumb,g_auto/dpr_1.0,w_auto/c_limit,w_1600/q_auto:eco/f_auto/v1786640244/propiedades/WhatsApp_Image_2026-08-13_at_1.46.27_PM_qvdvj5.jpg",
+    ],
+    sourceUrl: "https://www.mercado-unico.com/propiedades/6a7c8790eff114af468a02b6",
+  },
+  {
+    slug: "1-de-mayo-3181-lateral",
+    title: "1 de Mayo 3181 · Lateral",
+    type: "Departamento a estrenar",
+    location: "Constituyentes, Santa Fe",
+    operation: "Venta",
+    extra: "Entrega abril 2028 · financiación propia hasta 36 cuotas",
+    covered: "49 m² cubiertos",
+    rooms: "1 dormitorio",
+    baths: "1 baño",
+    description:
+      "Sauce 46, edificio en semi torre ubicado en 1° de Mayo 3181, en el corazón de Constituyentes, a metros de la plaza. Depto de 1 dormitorio con 50,48 m² de superficie propia: estar comedor integrado, cocina, dormitorio con placard, baño completo y balcón propio. El edificio cuenta con terraza en altura (piso 18) con piscina y solarium, asador doble equipado, espacios con pergolado semicubierto y cocheras cubiertas y descubiertas en PB. Hay más unidades disponibles en distintos pisos y orientaciones.",
+    features: ["Balcón", "Financiación propia sin banco", "Agua corriente", "Cloacas", "Pavimento"],
+    images: [
+      "https://images.mercado-unico.com/mu/c_thumb,g_auto/dpr_1.0,w_auto/c_limit,w_1600/q_auto:eco/f_auto/v1786640556/propiedades/WhatsApp_Image_2026-08-13_at_1.48.29_PM_rz6zld.jpg",
+    ],
+    sourceUrl: "https://www.mercado-unico.com/propiedades/6a7df8aeeff114af460b3b48",
+  },
+  {
+    slug: "saavedra-bariloche",
+    title: "Sobre Calle Saavedra",
+    type: "Monoambiente a estrenar",
+    location: "Parques Nacionales, San Carlos de Bariloche",
+    operation: "Venta",
+    extra: "Con cochera · alto potencial de renta temporaria",
+    covered: "32,75 m² cubiertos",
+    baths: "1 baño",
+    description:
+      "Ubicado frente a la histórica Plaza Belgrano, sobre la tranquila calle Saavedra y a solo cinco cuadras del Centro Cívico, este edificio de monoambientes y local en planta baja se encuentra en una de las áreas de mayor crecimiento turístico de San Carlos de Bariloche. Rodeado de cafés, comercios, senderos y espacios culturales, a minutos del Circuito Chico, el cerro Otto y el Nahuel Huapi. Ideal para alquileres temporarios: el constante flujo turístico garantiza alta demanda y excelente potencial de rentabilidad.",
+    features: ["Cochera", "Aire acondicionado", "Calefactor", "Gas natural", "Alto potencial de renta"],
+    images: [
+      "https://images.mercado-unico.com/mu/c_thumb,g_auto/dpr_1.0,w_auto/c_limit,w_1600/q_auto:eco/f_auto/v1763675513/propiedades/2e031f3a-4830-4517-afea-8eb64b41e60c_fkr6ut.jpg",
+    ],
+    sourceUrl: "https://www.mercado-unico.com/propiedades/691f6d310c57b60011f049f2",
+  },
+  {
+    slug: "inversion-en-pozo",
+    title: "Invertí en Pozo con APL",
+    type: "Departamentos en pozo",
+    location: "Santa Fe y alrededores",
+    operation: "Venta",
+    extra: "Reserva tu unidad antes del inicio de obra",
+    description:
+      "Sumate a nuestros proyectos en pozo: comprá en las primeras etapas de construcción y accedé a mejores precios, planes de pago flexibles y alto potencial de revalorización a la entrega. Mirá el video y escribime para conocer las unidades disponibles, el cronograma de obra y las condiciones de financiación.",
+    features: ["Planes de pago en cuotas", "Alto potencial de revalorización", "Asesoramiento personalizado"],
+    images: [],
+    video: "/videos/inversion-pozo.mp4",
+    sourceUrl: "https://www.instagram.com/apl.melizanabria",
+  },
 ];
+
+/** Propiedades ordenadas de mayor a menor precio (izquierda a derecha). Sin precio publicado van al final,
+ * y la propiedad de inversión en pozo (sin precio de venta) siempre queda última. */
+export const sortedProperties: Property[] = [...properties].sort((a, b) => {
+  if (a.slug === "inversion-en-pozo") return 1;
+  if (b.slug === "inversion-en-pozo") return -1;
+  const pa = a.sortPrice ?? -1;
+  const pb = b.sortPrice ?? -1;
+  return pb - pa;
+});
 
 export function getPropertyBySlug(slug: string | null | undefined) {
   if (!slug) return undefined;

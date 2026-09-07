@@ -13,7 +13,8 @@ import {
 import Nav from "@/components/Nav";
 import PropertyGallery from "@/components/PropertyGallery";
 import ContactFooterForm from "@/components/ContactFooter";
-import { properties } from "@/lib/properties";
+import { sortedProperties } from "@/lib/properties";
+import InstagramCard from "@/components/InstagramCard";
 import { MELISA_PHONE, buildWhatsAppLink } from "@/lib/whatsapp";
 
 const SERVICES = [
@@ -107,7 +108,7 @@ export default function Home() {
           </div>
           <div className="wrap wrap-slider">
             <Suspense fallback={<div className="slider-skeleton" />}>
-              <PropertyGallery properties={properties} />
+              <PropertyGallery properties={sortedProperties} />
             </Suspense>
           </div>
         </section>
@@ -124,6 +125,12 @@ export default function Home() {
                 seguimos la conversación por WhatsApp.
               </p>
             </div>
+          </div>
+        </section>
+        {/* INSTAGRAM */}
+        <section id="instagram" className="ig-preview">
+          <div className="wrap">
+            <InstagramCard />
           </div>
         </section>
       </main>
