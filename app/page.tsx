@@ -15,6 +15,7 @@ import PropertyGallery from "@/components/PropertyGallery";
 import ContactFooterForm from "@/components/ContactFooter";
 import { sortedProperties } from "@/lib/properties";
 import InstagramCard from "@/components/InstagramCard";
+import PozoInvestmentCard from "@/components/PozoInvestmentCard";
 import { MELISA_PHONE, buildWhatsAppLink } from "@/lib/whatsapp";
 
 const SERVICES = [
@@ -110,6 +111,13 @@ export default function Home() {
             <Suspense fallback={<div className="slider-skeleton" />}>
               <PropertyGallery properties={sortedProperties} />
             </Suspense>
+          </div>
+        </section>
+
+        {/* INVERSIÓN EN POZO */}
+        <section id="pozo" className="pozo-section">
+          <div className="wrap">
+            <PozoInvestmentCard />
           </div>
         </section>
 

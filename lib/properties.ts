@@ -15,9 +15,13 @@ export type Property = {
   description: string;
   features: string[];
   images: string[];
-  /** Si está definido, la card muestra este video en vez de imagen y el modal lo reproduce. */
-  video?: string;
   sourceUrl: string;
+};
+
+export type PozoInvestment = {
+  title: string;
+  description: string;
+  video: string;
 };
 
 export const properties: Property[] = [
@@ -224,31 +228,34 @@ export const properties: Property[] = [
     ],
     sourceUrl: "https://www.mercado-unico.com/propiedades/691f6d310c57b60011f049f2",
   },
-  {
-    slug: "inversion-en-pozo",
-    title: "Invertí en Pozo con APL",
-    type: "Departamentos en pozo",
-    location: "Santa Fe y alrededores",
-    operation: "Venta",
-    extra: "Reserva tu unidad antes del inicio de obra",
-    description:
-      "Sumate a nuestros proyectos en pozo: comprá en las primeras etapas de construcción y accedé a mejores precios, planes de pago flexibles y alto potencial de revalorización a la entrega. Mirá el video y escribime para conocer las unidades disponibles, el cronograma de obra y las condiciones de financiación.",
-    features: ["Planes de pago en cuotas", "Alto potencial de revalorización", "Asesoramiento personalizado"],
-    images: [],
-    video: "/videos/inversion-pozo.mp4",
-    sourceUrl: "https://www.instagram.com/apl.melizanabria",
-  },
 ];
 
-/** Propiedades ordenadas de mayor a menor precio (izquierda a derecha). Sin precio publicado van al final,
- * y la propiedad de inversión en pozo (sin precio de venta) siempre queda última. */
-export const sortedProperties: Property[] = [...properties].sort((a, b) => {
-  if (a.slug === "inversion-en-pozo") return 1;
-  if (b.slug === "inversion-en-pozo") return -1;
-  const pa = a.sortPrice ?? -1;
-  const pb = b.sortPrice ?? -1;
-  return pb - pa;
-});
+/** Video de inversión en pozo: se muestra aparte, en su propia sección, no dentro del carrusel de propiedades. */
+export const pozoInvestment: PozoInvestment = {
+  title: "Invertí en Pozo con APL",
+  description:
+    "Sumate a nuestros proyectos en pozo: comprá en las primeras etapas de construcción y accedé a mejores precios, planes de pago flexibles y alto potencial de revalorización a la entrega. Escribime para conocer las unidades disponibles, el cronograma de obra y las condiciones de financiación.",
+  video: "/videos/inversion-pozo.mp4",
+};
+
+/** Orden manual de las propiedades en el carrusel (izquierda a derecha). */
+const MANUAL_ORDER = [
+  "monsenor-zaspe-monte-vera",
+  "1-de-mayo-3181-frente",
+  "1-de-mayo-3181-lateral",
+  "saavedra-bariloche",
+  "av-freyre-2831",
+  "4-de-enero-4229",
+  "bygger-soul-colastine",
+  "paraje-los-jacintos",
+  "country-nuevos-aires-barrio-6",
+  "cordoba-2444-cochera",
+  "roverano-saavedra",
+];
+
+export const sortedProperties: Property[] = MANUAL_ORDER.map((slug) =>
+  properties.find((p) => p.slug === slug)
+).filter((p): p is Property => Boolean(p));
 
 export function getPropertyBySlug(slug: string | null | undefined) {
   if (!slug) return undefined;
