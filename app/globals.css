@@ -495,6 +495,22 @@ button {
   margin-top: 6px;
 }
 
+.reel-section {
+  padding: 32px 0 8px;
+}
+
+.reel-embed {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  min-height: 300px;
+}
+
+.reel-embed iframe {
+  max-width: 100% !important;
+}
+
 .ig-preview {
   padding: 40px 0 8px;
 }

@@ -16,6 +16,7 @@ import ContactFooterForm from "@/components/ContactFooter";
 import { sortedProperties } from "@/lib/properties";
 import InstagramCard from "@/components/InstagramCard";
 import PozoInvestmentCard from "@/components/PozoInvestmentCard";
+import InstagramReelSection from "@/components/InstagramReelSection";
 import { MELISA_PHONE, buildWhatsAppLink } from "@/lib/whatsapp";
 
 const SERVICES = [
@@ -111,6 +112,13 @@ export default function Home() {
             <Suspense fallback={<div className="slider-skeleton" />}>
               <PropertyGallery properties={sortedProperties} />
             </Suspense>
+          </div>
+        </section>
+
+        {/* REEL DESTACADO */}
+        <section id="reel" className="reel-section">
+          <div className="wrap">
+            <InstagramReelSection />
           </div>
         </section>
 
