@@ -26,7 +26,7 @@ export default function InstagramReelSection() {
             width: "100%",
           }}
         >
-          <a href={REEL_URL} target="_blank" rel="noopener noreferrer">
+          <a href="https://www.instagram.com/apl.melizanabria" target="_blank" rel="noopener noreferrer">
             Ver este reel en Instagram
           </a>
         </blockquote>
