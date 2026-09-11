@@ -11,6 +11,11 @@ const NAV_LINKS = [
   { href: "#contacto", label: "Contacto" },
 ];
 
+// URL de la Web App de Apps Script (el CRM). El acceso ya está
+// restringido por whitelist de email dentro del propio Apps Script.
+const CRM_URL =
+  "https://script.google.com/macros/s/AKfycbxfmlwZZCuuXwazyfrwlJeotW4z0vb8OeoI9oBunL_GfRqS2YMWXQkh19MH5ni_8ht0Mw/exec";
+
 export default function Nav() {
   const [open, setOpen] = useState(false);
   const waLink = buildWhatsAppLink(
@@ -43,6 +48,9 @@ export default function Nav() {
             </a>
           ))}
           <Link href="/links">Links</Link>
+          <a href={CRM_URL} target="_blank" rel="noopener noreferrer">
+            INGRESO
+          </a>
         </div>
 
         <a
@@ -74,6 +82,9 @@ export default function Nav() {
           <Link href="/links" onClick={() => setOpen(false)}>
             Links
           </Link>
+          <a href={CRM_URL} target="_blank" rel="noopener noreferrer" onClick={() => setOpen(false)}>
+            INGRESO
+          </a>
           <a href={waLink} target="_blank" rel="noopener noreferrer" className="btn btn-primary">
             Hablar por WhatsApp
           </a>
