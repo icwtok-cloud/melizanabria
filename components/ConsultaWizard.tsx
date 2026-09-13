@@ -3,26 +3,45 @@
 /**
  * ConsultaWizard
  * -----------------------------------------------------------------------
- * Adaptado del wizard de comprador de PROPOMI (BuyerIdentityModal.tsx +
- * OfferModal.tsx): mismo flujo de pasos con controles cerrados (slider +
- * chips, sin texto libre), pero acá no hay backend/marketplace en el
- * medio — el paso final arma un mensaje prolijo y abre WhatsApp directo
- * con el número de Meli (lib/whatsapp.ts).
+ * Wizard de consulta del comprador. Diseñado con foco en comportamiento
+ * de oferta y demanda para maximizar la tasa de finalización hasta el
+ * envío del WhatsApp:
  *
- * Se agregó un paso de "intención" (Comprar / Alquilar / Tasar la mía /
- * Solo consulta) porque, a diferencia de Propomi (que solo maneja
- * ofertas de compra en un marketplace), Meli necesita cubrir los 4
- * casos de uso desde el mismo botón "Consultar" de cada propiedad.
+ * 1) Arranca directo por "intención" (sin pedir datos personales antes).
+ *    Pedir un dato personal como primer paso es la principal fuente de
+ *    abandono en formularios — la gente entra "a mirar" y un muro de
+ *    nombre/celular la espanta. Acá el primer tap es gratis y fácil.
+ *
+ * 2) Solo maneja intención de COMPRA (más consulta/tasación como
+ *    salidas rápidas). No hay opción de alquiler: este es el embudo de
+ *    comprador de propiedades, y mezclar alquiler diluye la conversión
+ *    y ensucia el mensaje que le llega a Meli.
+ *
+ * 3) El dato de contacto (nombre + celular) se pide recién en el paso
+ *    final, junto al resumen y el botón de enviar. Para ese punto la
+ *    persona ya "invirtió" 2-3 respuestas — el efecto de compromiso
+ *    progresivo (foot-in-the-door / sunk cost) hace que dejar el dato
+ *    se sienta como el paso lógico para no perder lo que ya avanzó, en
+ *    vez de una barrera de entrada.
+ *
+ * 4) Barra de progreso visible desde el primer paso con 1 segmento ya
+ *    completado ("endowed progress effect": arrancar con una porción
+ *    de la barra ya llena aumenta la tasa de finalización aunque no
+ *    haya trabajo real hecho todavía).
+ *
+ * 5) El camino corto (consulta / tasación) salta directo casi al final,
+ *    mostrando la barra casi completa — refuerza "ya casi termino" y
+ *    baja la percepción de esfuerzo restante (gradiente de meta).
  *
  * Si la propiedad no tiene precio numérico (sortPrice), se omite el
- * paso de "cuánto ofrecés" y se pasa directo a capital/forma de pago.
+ * slider de oferta y se pasa directo a capital/forma de pago.
  */
 
 import { useMemo, useState } from "react";
 import { Property } from "@/lib/properties";
 import { MELISA_PHONE, buildWhatsAppLink } from "@/lib/whatsapp";
 
-type Intent = "COMPRAR" | "ALQUILAR" | "TASAR" | "CONSULTA";
+type Intent = "COMPRAR" | "TASAR" | "CONSULTA";
 
 const CAPITAL_BUCKETS = [
   { label: "Menos de USD 50.000", value: 30000 },
@@ -43,18 +62,16 @@ const CONDITIONS = [
   "Evalúo otras propiedades",
   "Sin condicionantes particulares",
 ];
-const INTENT_OPTIONS: { value: Intent; label: string }[] = [
-  { value: "COMPRAR", label: "Quiero comprarla" },
-  { value: "ALQUILAR", label: "Me interesa alquilarla" },
-  { value: "TASAR", label: "Quiero tasar la mía" },
-  { value: "CONSULTA", label: "Solo tengo una consulta" },
+const INTENT_OPTIONS: { value: Intent; label: string; helper: string }[] = [
+  { value: "COMPRAR", label: "Quiero comprarla", helper: "Armamos una propuesta en 3 pasos rápidos" },
+  { value: "TASAR", label: "Quiero tasar la mía", helper: "Te contactamos con una valuación" },
+  { value: "CONSULTA", label: "Solo tengo una consulta", helper: "Sin compromiso, respondemos rápido" },
 ];
 
 function intentLabel(intent: Intent | null) {
   return (
     {
       COMPRAR: "Quiero hacer una propuesta de compra",
-      ALQUILAR: "Me interesa alquilar",
       TASAR: "Quiero tasar mi propiedad",
       CONSULTA: "Solo quiero hacer una consulta",
     }[intent || "CONSULTA"] || "Consulta general"
@@ -65,6 +82,11 @@ function fmt(n: number) {
   return Math.round(n).toLocaleString("en-US");
 }
 
+// Pasos del camino "compra" completo. El camino corto (tasar/consulta)
+// salta de INTENCION directo a RESUMEN.
+const STEPS = ["INTENCION", "OFERTA", "PLAZO", "RESUMEN"] as const;
+type Step = (typeof STEPS)[number];
+
 export default function ConsultaWizard({
   property,
   onClose,
@@ -73,9 +95,8 @@ export default function ConsultaWizard({
   onClose: () => void;
 }) {
   const hasPrice = typeof property.sortPrice === "number";
-  const STEP_COUNT = 4;
 
-  const [step, setStep] = useState(0); // 0 = identidad, 1..4 = wizard
+  const [step, setStep] = useState<Step>("INTENCION");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -91,27 +112,20 @@ export default function ConsultaWizard({
     return Math.round((property.sortPrice as number) * (1 - pct / 100));
   }, [hasPrice, property.sortPrice, pct]);
 
+  // Progreso: en INTENCION ya mostramos 1 segmento lleno (endowed
+  // progress). En el camino corto, saltar a RESUMEN llena casi toda la
+  // barra de una, reforzando "ya casi termino".
+  const stepIndex = STEPS.indexOf(step);
+  const filledDots = step === "INTENCION" ? 1 : stepIndex + 1;
+
   function toggleCondition(c: string) {
     setConditions((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]));
   }
 
-  function submitIdentity() {
-    if (name.trim().length < 2) {
-      setError("Ingresá tu nombre y apellido.");
-      return;
-    }
-    if (phone.trim().length < 6) {
-      setError("Ingresá un celular válido.");
-      return;
-    }
-    setError(null);
-    setStep(1);
-  }
-
-  function continueFromIntent() {
-    if (!intent) return;
-    // Si no es una propuesta de compra, saltamos directo al resumen
-    setStep(intent === "COMPRAR" ? 2 : 4);
+  function chooseIntent(value: Intent) {
+    setIntent(value);
+    // Avanza solo, sin pedir un "Continuar" extra: menos taps, más inercia.
+    setStep(value === "COMPRAR" ? "OFERTA" : "RESUMEN");
   }
 
   function buildMessage() {
@@ -139,10 +153,26 @@ export default function ConsultaWizard({
   }
 
   function sendWhatsApp() {
+    if (name.trim().length < 2) {
+      setError("Ingresá tu nombre y apellido.");
+      return;
+    }
+    if (phone.trim().length < 6) {
+      setError("Ingresá un celular válido.");
+      return;
+    }
+    setError(null);
     const url = buildWhatsAppLink(MELISA_PHONE, buildMessage());
     window.open(url, "_blank", "noopener");
     onClose();
   }
+
+  const titles: Record<Step, string> = {
+    INTENCION: "¿Qué te gustaría hacer?",
+    OFERTA: "¿Cuánto querés ofrecer?",
+    PLAZO: "Contanos los detalles",
+    RESUMEN: "Último paso: así queda tu consulta",
+  };
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
@@ -160,87 +190,40 @@ export default function ConsultaWizard({
         <div className="wizard-content">
           <div className="modalhead">
             <span className="eyebrow">Consulta</span>
-            <h2>{step === 0 ? "¿Cómo te contactamos?" : "Contanos qué necesitás"}</h2>
+            <h2>{titles[step]}</h2>
             <p className="muted">
               {property.title}
               {property.price ? ` · ${property.price}` : ""}
             </p>
           </div>
 
-          {step > 0 && (
-            <div className="wizprogress">
-              {Array.from({ length: STEP_COUNT }).map((_, i) => (
-                <span key={i} className={i < step ? "done" : ""} />
-              ))}
-            </div>
-          )}
+          <div className="wizprogress">
+            {STEPS.map((_, i) => (
+              <span key={i} className={i < filledDots ? "done" : ""} />
+            ))}
+          </div>
 
-          {/* Paso 0: identidad */}
-          {step === 0 && (
+          {/* Paso 1: intención (arranca acá, sin pedir datos) */}
+          {step === "INTENCION" && (
             <div className="wizstep">
-              <div className="qlabel">Nombre y apellido</div>
-              <div className="formgrid">
-                <input
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Ej: María Fernández"
-                  autoFocus
-                />
-              </div>
-              <div className="qlabel" style={{ marginTop: 14 }}>
-                Celular
-              </div>
-              <div className="formgrid">
-                <input
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="Ej: 342 508-8763"
-                  inputMode="tel"
-                />
-              </div>
-              {error && <div className="notice notice-error">{error}</div>}
-              <div className="notice">
-                🔒 Esto se usa solo para que Meli te responda por WhatsApp. No se comparte con nadie más.
-              </div>
-              <div className="wizactions">
-                <button className="btn btn-ghost" onClick={onClose}>
-                  Cancelar
-                </button>
-                <button className="btn btn-primary" onClick={submitIdentity}>
-                  Continuar
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Paso 1: intención */}
-          {step === 1 && (
-            <div className="wizstep">
-              <div className="qlabel">¿Qué te gustaría hacer?</div>
+              <div className="qlabel">Elegí una opción para empezar</div>
               <div className="chipgrid">
                 {INTENT_OPTIONS.map((o) => (
                   <button
                     key={o.value}
                     className={intent === o.value ? "wchip selected" : "wchip"}
-                    onClick={() => setIntent(o.value)}
+                    onClick={() => chooseIntent(o.value)}
                   >
-                    {o.label}
+                    <span>{o.label}</span>
                   </button>
                 ))}
               </div>
-              <div className="wizactions">
-                <button className="btn btn-ghost" onClick={() => setStep(0)}>
-                  Volver
-                </button>
-                <button className="btn btn-primary" disabled={!intent} onClick={continueFromIntent}>
-                  Continuar
-                </button>
-              </div>
+              <div className="notice">⚡ Es rápido: no te pedimos ningún dato todavía.</div>
             </div>
           )}
 
           {/* Paso 2: monto + capital + forma de pago (solo COMPRAR) */}
-          {step === 2 && (
+          {step === "OFERTA" && (
             <div className="wizstep">
               {hasPrice && (
                 <>
@@ -301,22 +284,22 @@ export default function ConsultaWizard({
                 ))}
               </div>
               <div className="wizactions">
-                <button className="btn btn-ghost" onClick={() => setStep(1)}>
+                <button className="btn btn-ghost" onClick={() => setStep("INTENCION")}>
                   Volver
                 </button>
                 <button
                   className="btn btn-primary"
                   disabled={capitalIdx === null || paymentIdx === null}
-                  onClick={() => setStep(3)}
+                  onClick={() => setStep("PLAZO")}
                 >
-                  Continuar
+                  Ya casi termino →
                 </button>
               </div>
             </div>
           )}
 
           {/* Paso 3: plazo + condicionantes (solo COMPRAR) */}
-          {step === 3 && (
+          {step === "PLAZO" && (
             <div className="wizstep">
               <div className="qlabel">¿En qué plazo podrías cerrar la operación?</div>
               <div className="chipgrid">
@@ -347,18 +330,18 @@ export default function ConsultaWizard({
                 ))}
               </div>
               <div className="wizactions">
-                <button className="btn btn-ghost" onClick={() => setStep(2)}>
+                <button className="btn btn-ghost" onClick={() => setStep("OFERTA")}>
                   Volver
                 </button>
-                <button className="btn btn-primary" disabled={!timeframe} onClick={() => setStep(4)}>
-                  Continuar
+                <button className="btn btn-primary" disabled={!timeframe} onClick={() => setStep("RESUMEN")}>
+                  Ver resumen y enviar →
                 </button>
               </div>
             </div>
           )}
 
-          {/* Paso 4: resumen y envío */}
-          {step === 4 && (
+          {/* Paso 4: resumen + datos de contacto + envío */}
+          {step === "RESUMEN" && (
             <div className="wizstep">
               <div className="qlabel">Así queda tu consulta</div>
               <div className="summarycard">
@@ -392,20 +375,38 @@ export default function ConsultaWizard({
                     </div>
                   </>
                 )}
-                <div className="summaryrow">
-                  <span>Nombre</span>
-                  <b>{name}</b>
-                </div>
-                <div className="summaryrow">
-                  <span>Celular</span>
-                  <b>{phone}</b>
-                </div>
               </div>
+
+              <div className="qlabel" style={{ marginTop: 16 }}>
+                ¿A dónde te contestamos?
+              </div>
+              <div className="qhelp small">Es lo último que falta — con esto Meli te responde directo.</div>
+              <div className="formgrid">
+                <input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Nombre y apellido"
+                  autoFocus
+                />
+              </div>
+              <div className="formgrid" style={{ marginTop: 10 }}>
+                <input
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="Celular (Ej: 342 508-8763)"
+                  inputMode="tel"
+                />
+              </div>
+              {error && <div className="notice notice-error">{error}</div>}
               <div className="notice">
-                📲 Al continuar se abre WhatsApp con el mensaje ya redactado — vos solo tenés que enviarlo.
+                🔒 Solo se usa para que Meli te responda por WhatsApp. No se comparte con nadie más. Meli suele
+                responder el mismo día.
               </div>
               <div className="wizactions">
-                <button className="btn btn-ghost" onClick={() => setStep(intent === "COMPRAR" ? 3 : 1)}>
+                <button
+                  className="btn btn-ghost"
+                  onClick={() => setStep(intent === "COMPRAR" ? "PLAZO" : "INTENCION")}
+                >
                   Volver
                 </button>
                 <button className="btn btn-primary" onClick={sendWhatsApp}>
