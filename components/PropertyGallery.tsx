@@ -4,13 +4,21 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { X, ChevronLeft, ChevronRight, MapPin } from "lucide-react";
 import { Property } from "@/lib/properties";
-import { MELISA_PHONE, buildWhatsAppLink, propertyWhatsAppMessage } from "@/lib/whatsapp";
+import ConsultaWizard from "@/components/ConsultaWizard";
 
-export default function PropertyGallery({ properties }: { properties: Property[] }) {
+export default function PropertyGallery({
+  properties,
+  variant = "slider",
+}: {
+  properties: Property[];
+  /** "slider": carrusel horizontal (home). "grid": grilla completa (página /propiedades). */
+  variant?: "slider" | "grid";
+}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
   const [photoIndex, setPhotoIndex] = useState(0);
+  const [consultaOpen, setConsultaOpen] = useState(false);
 
   // Deep-link: si alguien entra con ?propiedad=slug, abrimos el detalle directo
   useEffect(() => {
@@ -34,19 +42,13 @@ export default function PropertyGallery({ properties }: { properties: Property[]
 
   function closeProperty() {
     setActiveSlug(null);
+    setConsultaOpen(false);
     router.replace(window.location.pathname, { scroll: false });
-  }
-
-  function whatsAppUrlFor(p: Property) {
-    const propertyUrl = `${typeof window !== "undefined" ? window.location.origin : "https://melizanabria.com.ar"}${
-      typeof window !== "undefined" ? window.location.pathname : "/"
-    }?propiedad=${p.slug}`;
-    return buildWhatsAppLink(MELISA_PHONE, propertyWhatsAppMessage(propertyUrl, p.title));
   }
 
   return (
     <>
-      <div className="slider" role="list">
+      <div className={variant === "grid" ? "properties-grid-full" : "slider"} role="list">
         {properties.map((p) => (
           <button
             key={p.slug}
@@ -74,7 +76,7 @@ export default function PropertyGallery({ properties }: { properties: Property[]
         ))}
       </div>
 
-      {active && (
+      {active && !consultaOpen && (
         <div className="modal-backdrop" onClick={closeProperty}>
           <div
             className="modal-sheet"
@@ -140,17 +142,16 @@ export default function PropertyGallery({ properties }: { properties: Property[]
                 </ul>
               )}
 
-              <a
-                className="btn btn-primary modal-cta"
-                href={whatsAppUrlFor(active)}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Consultar por WhatsApp
-              </a>
+              <button className="btn btn-primary modal-cta" onClick={() => setConsultaOpen(true)}>
+                Consultar por esta propiedad
+              </button>
             </div>
           </div>
         </div>
+      )}
+
+      {active && consultaOpen && (
+        <ConsultaWizard property={active} onClose={() => setConsultaOpen(false)} />
       )}
     </>
   );

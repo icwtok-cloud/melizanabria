@@ -65,7 +65,7 @@ export default function Home() {
                   <MessageCircle size={17} strokeWidth={2.2} />
                   Hablemos por WhatsApp
                 </a>
-                <a className="btn btn-ghost" href="#propiedades">
+                <a className="btn btn-ghost" href="/propiedades">
                   Ver propiedades
                 </a>
               </div>
@@ -112,6 +112,11 @@ export default function Home() {
             <Suspense fallback={<div className="slider-skeleton" />}>
               <PropertyGallery properties={sortedProperties} />
             </Suspense>
+          </div>
+          <div className="wrap properties-see-all">
+            <a className="btn btn-ghost" href="/propiedades">
+              Ver todas las propiedades →
+            </a>
           </div>
         </section>
 

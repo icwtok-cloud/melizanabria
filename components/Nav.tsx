@@ -6,9 +6,8 @@ import { Menu, X, MessageCircle } from "lucide-react";
 import { MELISA_PHONE, buildWhatsAppLink } from "@/lib/whatsapp";
 
 const NAV_LINKS = [
-  { href: "#propiedades", label: "Propiedades" },
-  { href: "#servicios", label: "Servicios" },
-  { href: "#contacto", label: "Contacto" },
+  { href: "/#servicios", label: "Servicios" },
+  { href: "/#contacto", label: "Contacto" },
 ];
 
 // URL de la Web App de Apps Script (el CRM). El acceso ya está
@@ -42,6 +41,7 @@ export default function Nav() {
         </a>
 
         <div className="nav-links-desktop">
+          <Link href="/propiedades">Propiedades</Link>
           {NAV_LINKS.map((l) => (
             <a key={l.href} href={l.href}>
               {l.label}
@@ -74,6 +74,9 @@ export default function Nav() {
 
       {open && (
         <div className="nav-mobile">
+          <Link href="/propiedades" onClick={() => setOpen(false)}>
+            Propiedades
+          </Link>
           {NAV_LINKS.map((l) => (
             <a key={l.href} href={l.href} onClick={() => setOpen(false)}>
               {l.label}
